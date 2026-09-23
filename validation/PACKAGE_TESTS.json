@@ -1,0 +1,7 @@
+{
+  "status": "PASS",
+  "returncode": 0,
+  "tests": 8,
+  "stdout": "",
+  "stderr": "test_absolute_path_rejected (test_release.ReleaseIntegrityTests) ... ok\ntest_changed_file_rejected (test_release.ReleaseIntegrityTests) ... ok\ntest_current_extensions_included (test_release.ReleaseIntegrityTests) ... ok\ntest_duplicate_path_rejected (test_release.ReleaseIntegrityTests) ... ok\ntest_missing_file_rejected (test_release.ReleaseIntegrityTests) ... ok\ntest_parent_path_rejected (test_release.ReleaseIntegrityTests) ... ok\ntest_read_only_real_validation (test_release.ReleaseIntegrityTests) ... ok\ntest_valid_fixture (test_release.ReleaseIntegrityTests) ... ok\n\n----------------------------------------------------------------------\nRan 8 tests in 1.135s\n\nOK\n"
+}

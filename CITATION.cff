@@ -1,0 +1,19 @@
+cff-version: 1.2.0
+message: "Cite the SecondSite manuscript and the archived software release when available."
+title: "SecondSite analysis code"
+type: software
+version: "0.2.0-prepublication"
+authors:
+  - family-names: Jeong
+    given-names: Heesu
+  - family-names: Shin
+    given-names: Hanshin David
+  - family-names: Jhang
+    given-names: So Yun
+  - family-names: Yi
+    given-names: Lina
+  - family-names: Seo
+    given-names: Jeongwoo
+  - family-names: Kim
+    given-names: Heebal
+abstract: "Reference preprocessing, controlled allosteric–orthosteric classification, ChEMBL screening, BioLiP pair ranking, and ranking comparison."

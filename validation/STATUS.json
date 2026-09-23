@@ -1,0 +1,10 @@
+{
+  "status": "ANALYSIS_ONLY_PUBLICATION_SUBSET_VALIDATED",
+  "stages": 8,
+  "github_upload": "not_performed",
+  "git_operations_performed": false,
+  "scientific_analyses_rerun": false,
+  "dedicated_secondsite_export_included": false,
+  "manuscript_figures_included": false,
+  "original_package_preserved": true
+}

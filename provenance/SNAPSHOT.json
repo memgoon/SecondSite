@@ -1,9 +1,0 @@
-{
-  "parent_release": "secondsite_publication_code_v1",
-  "parent_manifest_sha256": "33cbb0652039914dc2b8a7e3741e87c5c6cd51b7efc610f8bd3e61b83736e27e",
-  "source_files": 271,
-  "code_files": 225,
-  "omitted_files": 33,
-  "retained_sources_byte_identical": true,
-  "upstream_modified": false
-}

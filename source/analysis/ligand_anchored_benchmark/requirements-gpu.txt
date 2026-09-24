@@ -1,2 +1,0 @@
--r requirements-cpu.txt
-torch>=2.0,<3

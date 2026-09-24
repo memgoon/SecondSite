@@ -1,8 +1,10 @@
 cff-version: 1.2.0
-message: "Cite the SecondSite manuscript and the archived software release when available."
-title: "SecondSite analysis code"
+message: "Please cite the SecondSite manuscript and this analysis code when using these methods."
+title: "SecondSite: analysis code for allosteric–orthosteric benchmarking and interaction ranking"
 type: software
-version: "0.2.0-prepublication"
+version: "0.3.0"
+repository-code: "https://github.com/memgoon/SecondSite"
+url: "https://secondsite.snu.ac.kr"
 authors:
   - family-names: Jeong
     given-names: Heesu
@@ -16,4 +18,4 @@ authors:
     given-names: Jeongwoo
   - family-names: Kim
     given-names: Heebal
-abstract: "Reference preprocessing, controlled allosteric–orthosteric classification, ChEMBL screening, BioLiP pair ranking, and ranking comparison."
+abstract: "Controlled allosteric–orthosteric classification, ChEMBL screening, BioLiP pair reconstruction and likelihood ranking, and comparison of neural and structural rankings."

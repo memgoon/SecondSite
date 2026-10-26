@@ -2,7 +2,8 @@ cff-version: 1.2.0
 message: "Please cite the SecondSite manuscript and this analysis code when using these methods."
 title: "SecondSite: analysis code for allosteric–orthosteric benchmarking and interaction ranking"
 type: software
-version: "0.3.0"
+version: "0.4.0"
+license: MIT
 repository-code: "https://github.com/memgoon/SecondSite"
 url: "https://secondsite.snu.ac.kr"
 authors:

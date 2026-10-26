@@ -18,7 +18,7 @@ AdamW uses learning rate and weight decay 1e-4. Models run for at most 25 epochs
 
 Checkpoint selection uses validation within-protein AUROC for ligand-only, within-ligand AUROC for protein-only, and the split-specific conditional statistic for pair models. Random-split pair models require both conditional statistics. Fewer than eight eligible groups triggers symmetric average-precision fallback. The general-dataset implementation groups ligand selection statistics by connectivity; the Both-class ligands implementation uses full InChIKey, as in its source experiment. This distinction is explicit in the training code. Reported within-exact-ligand evaluation remains available separately.
 
-Deployment starts from initialization and uses the integer median best epoch of the corresponding 15 Pfam-held-out fits. External outcomes do not select an epoch. The deployment reports used by the concise runner are its own fit records; conversion of older execution-specific checkpoint reports is an input-preparation task.
+Deployment starts from initialization and uses the integer median best epoch of the corresponding 15 Pfam-held-out fits. External outcomes do not select an epoch.
 
 ## Evaluation and external rankings
 
@@ -34,6 +34,56 @@ Four features—orthosteric-site distance, molecular weight, cLogP and aromatic-
 
 The optional review funnel applies spatial, compound and known-role checks before agreement across four ranking views and repeated-PDB support. These flags organize review; they do not establish novelty or a functional mechanism. The direct-distance reference result is linked to how known sites were selected and should not be interpreted as prospective allostery accuracy.
 
-## Scope of this code release
+## Time-split validation
 
-The eight modules expose the core scientific operations with explicit table inputs. Database-specific extraction, manual identity decisions, pretrained encoder execution, structure preparation, environment transfer, manuscript rendering and web deployment are outside this concise source release. The supplied input schemas make these boundaries explicit. The publication's frozen input tables and representations are necessary to reproduce its exact numerical populations.
+Records dated through 2015 form the earlier pool; records from 2016 onward form
+the later curated test. Undated records are excluded from training. Earlier
+protein–connectivity pairs are removed from the later curated test. The four
+training datasets are reconstructed from earlier labels only. For each dataset,
+a chronological validation boundary is chosen to approach 20% validation while
+retaining both classes and at least 10 training and 6 validation records.
+
+Epoch selection uses the mean of within-protein and within-ligand AUROC for pair
+models, the discriminable conditional AUROC for single-input models, and symmetric
+average precision when fewer than eight conditional groups are available. Models
+are then reinitialized with the same seed and fitted to the full earlier cohort
+for the selected number of epochs. The later test is evaluated after refitting.
+Linked source years identify the temporal split; they are not automatically the
+first experimental report of each binding role.
+
+External recovery uses the frozen later ChEMBL population after exclusion of
+earlier and undated protein–connectivity pairs. Assay-keyword and literature-review
+indicators are separate evidence sets. Scores are not refitted to those indicators.
+Boundary ties receive fractional selection weights. Within-protein enrichment
+compares observed recovery with the sum of protein-specific random expectations.
+Intervals use 10,000 protein-cluster draws, shared across model comparisons, with
+at least 95% defined replicates required. Records outside an evidence set remain
+unlabelled, not confirmed orthosteric negatives.
+
+## Docking and site comparison
+
+The docking comparison matches compounds in the top and bottom 10% of each
+protein's ranking. Molecular-weight differences must be at most 25% of the
+high-ranked compound's mass, logP differences at most 1.5, and polar-surface-area
+differences at most 40 square angstroms. Source and pH 7.4 formal charges must
+match. Comparison compounds are used once per protein and ranking condition.
+The supplied protein panel and per-protein limits are fixed before docking.
+
+Each ligand and search box is evaluated with Vina and Vinardo using five seeds.
+Only the first-ranked pose is classified. It must have the expected heavy-atom
+count, at least three target contact residues within 4 angstroms, and no receptor
+heavy atom closer than 1.2 angstroms. Spatial separation requires zero shared
+orthosteric contact residues and at least 6 angstroms to the orthosteric reference
+atoms. Known-allosteric-site correspondence independently requires at least three
+shared contact residues, at least 25% reference-contact recall, and a centroid
+within 5 angstroms of the observed reference ligand. The search box must cover
+the reference centroid and at least 80% of its heavy atoms.
+
+Support requires at least three seeds per scoring function in the same box;
+known-site support also requires agreement on the same reference site. A separate
+spatial-stability measure groups eligible pose centroids around a medoid. Matched
+high-minus-low frequencies use protein-cluster bootstrap intervals and
+protein-block sign-flip tests. Holm correction uses the 16 cohort/model conditions
+within each endpoint, score threshold and scoring criterion. Unsupported reference
+sites and incomplete matched comparisons are excluded explicitly rather than
+recorded as unsuccessful poses. Docking scores are not experimental binding energies.

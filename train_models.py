@@ -12,7 +12,7 @@ import torch
 from torch import nn
 from torch.utils.data import DataLoader, Dataset
 
-from build_datasets import partition, leave_one_family_out
+from build_datasets import partition, leave_one_family_out, legacy_dataset, legacy_regime, DATASET_NAMES, REGIME_NAMES
 from evaluate_models import checkpoint_selection
 
 PROTEIN_DIM = 1536
@@ -384,9 +384,9 @@ def deployment_epochs(paths, dataset, model):
         raise ValueError("Deployment requires all 15 distinct Pfam-held-out fits")
     for report, path in zip(reports, paths):
         if (
-            report["dataset"] != dataset
+            legacy_dataset(report["dataset"]) != legacy_dataset(dataset)
             or report["model"] != model
-            or report["regime"] != "unseen_family"
+            or legacy_regime(report["regime"]) != "unseen_family"
         ):
             raise ValueError("Wrong source fit for deployment")
         if (
@@ -398,6 +398,8 @@ def deployment_epochs(paths, dataset, model):
 
 
 def train(args):
+    args.dataset = legacy_dataset(args.dataset)
+    args.regime = legacy_regime(args.regime)
     frame = pd.read_csv(args.pairs, sep="\t")
     if frame.main_row_id.duplicated().any():
         raise ValueError("Duplicate pair row")
@@ -426,7 +428,7 @@ def train(args):
     elif args.leave_family:
         if args.dataset != "double_anchored" or args.regime != "double_unseen":
             raise ValueError(
-                "Leave-one-family-out protocol is for double-anchored double held-out"
+                "Leave-one-family-out protocol is for Both-class proteins & ligands under double held-out"
             )
         train, validation, test = leave_one_family_out(frame, args.leave_family)
         epochs = 25
@@ -562,6 +564,8 @@ def train(args):
         test.to_csv(args.output / "predictions.tsv.gz", sep="\t", index=False)
     report = dict(
         dataset=args.dataset,
+        dataset_name=DATASET_NAMES[args.dataset],
+        evaluation_setting="deployment" if deployment else REGIME_NAMES[args.regime],
         model=args.model,
         seed=args.seed,
         outer_fold=args.leave_family or args.fold,
@@ -591,6 +595,9 @@ def main():
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument(
         "--dataset",
+        type=legacy_dataset,
+        metavar="DATASET",
+        help="every_pair, both_class_proteins, both_class_ligands, both_class_proteins_ligands (historical aliases accepted)",
         choices=[
             "every_pair",
             "protein_anchored",
@@ -602,6 +609,9 @@ def main():
     parser.add_argument("--model", choices=VALID_MODELS, required=True)
     parser.add_argument(
         "--regime",
+        type=legacy_regime,
+        metavar="SETTING",
+        help="random, pfam_held_out, ligand_held_out, double_held_out (historical aliases accepted)",
         choices=["row_random", "unseen_family", "unseen_ligand", "double_unseen"],
         default="unseen_family",
     )

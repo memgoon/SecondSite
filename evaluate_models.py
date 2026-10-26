@@ -7,6 +7,7 @@ import json
 import numpy as np
 import pandas as pd
 from sklearn.metrics import average_precision_score, roc_auc_score
+from build_datasets import legacy_regime
 
 
 def binary_metrics(frame, score="score", weights=None):
@@ -51,6 +52,7 @@ def conditional_metrics(frame, identity, score="score"):
 
 
 def checkpoint_selection(frame, model, regime, ligand_identity="connectivity_key"):
+    regime = legacy_regime(regime)
     if model == "ligand" or (
         model not in {"ligand", "protein"} and regime == "unseen_ligand"
     ):

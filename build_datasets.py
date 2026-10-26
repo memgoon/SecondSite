@@ -15,6 +15,28 @@ FOLD_COLUMNS = {
     "double_unseen": "matrix_family_fold",
 }
 
+# Public manuscript terminology; historical keys remain readable for old artifacts.
+DATASET_NAMES = {
+    "every_pair": "every_pair",
+    "protein_anchored": "both_class_proteins",
+    "ligand_anchored": "both_class_ligands",
+    "double_anchored": "both_class_proteins_ligands",
+}
+REGIME_NAMES = {
+    "row_random": "random",
+    "unseen_family": "pfam_held_out",
+    "unseen_ligand": "ligand_held_out",
+    "double_unseen": "double_held_out",
+}
+
+
+def legacy_dataset(value):
+    return {v:k for k,v in DATASET_NAMES.items()}.get(value,value)
+
+
+def legacy_regime(value):
+    return {v:k for k,v in REGIME_NAMES.items()}.get(value,value)
+
 
 def both_roles(frame, identity):
     return frame[frame.groupby(identity).binary_label.transform("nunique") == 2].copy()
@@ -29,13 +51,13 @@ def construct_datasets(frame):
     if not set(frame.binary_label).issubset({0, 1}):
         raise ValueError("Invalid binding-role label")
     if "matrix_evaluation_eligible" not in frame:
-        raise ValueError("Supply the frozen protein-anchored evaluation membership")
+        raise ValueError("Supply the frozen Both-class proteins evaluation membership")
     protein = frame[frame.matrix_evaluation_eligible.eq(1)].copy()
     if (
         protein.empty
         or not protein.groupby("uniprot").binary_label.nunique().eq(2).all()
     ):
-        raise ValueError("Frozen protein-anchored membership must retain both roles")
+        raise ValueError("Frozen Both-class proteins membership must retain both class labels")
     double = protein.copy()
     while True:
         reduced = both_roles(both_roles(double, "uniprot"), "full_inchikey")
@@ -63,6 +85,7 @@ def scaffold_set(frame):
 
 def partition(frame, regime, fold, scaffold_exclusion=False):
     """Use frozen fold assignments; purge double-held-out identities before fitting."""
+    regime = legacy_regime(regime)
     col = FOLD_COLUMNS[regime]
     # Dataset-specific completed assignments supersede the shared initial folds.
     if col == "matrix_family_fold" and "run_family_fold" in frame:
@@ -147,6 +170,7 @@ def main():
     parser.add_argument("--model-ready-pairs", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--include-scaffolds", action="store_true")
+    parser.add_argument("--legacy-filenames", action="store_true", help="Write historical cohort filenames for existing workflows")
     args = parser.parse_args()
     frame = pd.read_csv(args.model_ready_pairs, sep="\t")
     if args.include_scaffolds:
@@ -161,10 +185,11 @@ def main():
             if name == "every_pair"
             else 1
         )
-        data.to_csv(args.output / f"{name}.tsv.gz", sep="\t", index=False)
+        output_name = name if args.legacy_filenames else DATASET_NAMES[name]
+        data.to_csv(args.output / f"{output_name}.tsv.gz", sep="\t", index=False)
         summary.append(
             dict(
-                dataset=name,
+                dataset=output_name,
                 pairs=len(data),
                 proteins=data.uniprot.nunique(),
                 ligands=data.full_inchikey.nunique(),

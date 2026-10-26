@@ -22,20 +22,20 @@ Allosteric annotations come from ASD. Orthosteric references come from GtoPdb, K
 | Dataset | Selection rule | Pairs | Proteins | Ligands |
 |---|---|---:|---:|---:|
 | Every-pair | All model-ready pairs | 6,854 | 940 | 4,418 |
-| Protein-anchored | Frozen evaluation set; each protein has both binding roles | 4,637 | 426 | 2,910 |
-| Ligand-anchored | Each retained ligand has both binding roles | 1,365 | 543 | 122 |
-| Double-anchored | Both requirements hold after iterative filtering | 395 | 98 | 40 |
+| Both-class proteins | Frozen evaluation set; each protein has both class labels | 4,637 | 426 | 2,910 |
+| Both-class ligands | Each retained ligand has both class labels | 1,365 | 543 | 122 |
+| Both-class proteins & ligands | Both requirements hold after iterative filtering | 395 | 98 | 40 |
 
-The protein-anchored set preserves the frozen evaluation population; the broader every-pair set adds training records. Ligand anchoring is selected from the every-pair dataset, while double anchoring iteratively filters the protein-anchored set. Anchoring requires both roles to be represented; it does not impose a 1:1 class ratio.
+Both-class means that allosteric and orthosteric class labels are both represented for each retained protein or ligand. Both-class proteins preserves the frozen evaluation population; the broader every-pair set adds training records. Both-class ligands is selected from every-pair, while Both-class proteins & ligands iteratively filters Both-class proteins. The requirement does not impose a 1:1 class ratio. Dataset selection is based on individual protein or ligand identities; Pfam-family grouping is a separate evaluation-split operation.
 
 The eight models are ligand-only, protein-only, C1–C3 and D1–D3. C models receive the selected PDB-chain sequence; D models receive residues from its predicted pockets. The numeric suffix denotes concatenation, unidirectional cross-attention or bidirectional cross-attention. Protein and ligand encoders are held fixed while the prediction heads are trained.
 
-Models are assessed under random, Pfam-family-held-out, ligand-held-out and double-held-out evaluation. Ligand exclusion uses molecular connectivity. An additional Murcko scaffold analysis tests a broader structural exclusion. The double-anchored double-held-out experiment uses 47 leave-one-family-out partitions because the standard five-fold design leaves too little training data.
+Models are assessed under random, Pfam held-out, ligand held-out and double held-out evaluation. Ligand exclusion uses molecular connectivity. An additional Murcko scaffold analysis tests a broader structural exclusion. Only double held-out evaluation on Both-class proteins & ligands uses 47 leave-one-family-out partitions; its Pfam held-out evaluation remains five-fold.
 
 ## Main findings
 
-- **Dataset composition matters.** On 4,637 common test pairs, every-pair cross-attention models reached AUROCs of 0.927–0.942 under random splitting and 0.790–0.809 when both protein families and ligand identities were held out. The corresponding single-input controls had lower discrimination in their anchored datasets.
-- **The strongest identity constraints leave a small benchmark.** Double anchoring retained 395 pairs. Under double-held-out evaluation, the 95% AUROC intervals of all eight models included 0.5.
+- **Dataset composition matters.** On 4,637 common test pairs, every-pair cross-attention models reached AUROCs of 0.927–0.942 under random splitting and 0.790–0.809 when both protein families and ligand identities were held out. The corresponding single-input controls had lower discrimination in their both-class datasets.
+- **The strongest identity constraints leave a small benchmark.** Both-class proteins & ligands retained 395 pairs. Under double held-out evaluation, the 95% AUROC intervals of all eight models included 0.5.
 - **ChEMBL rankings recover text-supported candidates unevenly across models.** Allosteric keywords appeared in 1,442 of 781,532 screened records (0.18%). For every-pair-trained D2, 39 of the top 782 records contained these keywords: 5.0%, or 27-fold enrichment. A separate evaluation uses published positive and negative binding-role annotations.
 - **Observed structures provide another basis for ranking.** BioLiP reconstruction produced 1,322 labelled reference pairs and 2,890 candidate pairs; 2,874 candidate pairs had complete ranking inputs. Distance and ligand-property likelihood ratios recover known reference classes, although distance is closely related to the structural reference definitions.
 
@@ -77,9 +77,9 @@ python build_datasets.py --model-ready-pairs inputs/model_ready_pairs.tsv.gz \
   --include-scaffolds --output results/datasets
 
 # Fit one model, seed and outer fold. Repeat using the frozen experiment design.
-python train_models.py --pairs results/datasets/protein_anchored.tsv.gz \
+python train_models.py --pairs results/datasets/both_class_proteins.tsv.gz \
   --pockets inputs/pocket_indices.json --tensor-root inputs/tensors \
-  --dataset protein_anchored --regime unseen_family --model c2 \
+  --dataset both_class_proteins --regime pfam_held_out --model c2 \
   --fold 0 --seed 20260817 --device cuda:0 --output results/fits/c2_seed20260817_fold0
 
 # Evaluate predictions from three seeds across all outer folds.
@@ -92,6 +92,26 @@ python rank_biolip.py --reference-observations inputs/reference_observations.tsv
 ```
 
 Each script provides `--help`. Output directories must be new. Training jobs are individual fits so they can be scheduled independently across available GPUs. Data preparation, reference identity decisions and encoder inputs are described in [METHODS.md](METHODS.md); supplementary experiments use the same model and evaluation functions with their specified inputs.
+
+## Terminology and compatibility
+
+| Manuscript label | Recommended command-line value | Historical alias |
+|---|---|---|
+| Every-pair | `every_pair` | unchanged |
+| Both-class proteins | `both_class_proteins` | `protein_anchored` |
+| Both-class ligands | `both_class_ligands` | `ligand_anchored` |
+| Both-class proteins & ligands | `both_class_proteins_ligands` | `double_anchored` |
+| Random | `random` | `row_random` |
+| Pfam held-out | `pfam_held_out` | `unseen_family` |
+| Ligand held-out | `ligand_held_out` | `unseen_ligand` |
+| Double held-out | `double_held_out` | `double_unseen` |
+
+Both naming sets are accepted. Dataset output filenames use the recommended names
+by default; `build_datasets.py --legacy-filenames` preserves older filenames.
+Historical artifact identifiers remain readable and are not silently rewritten.
+New fit reports include `dataset_name` and `evaluation_setting` using the current
+terminology. ChEMBL `protein_unseen` and `ligand_unseen` columns describe absence
+from training, not a Pfam-held-out experiment; their meaning is unchanged.
 
 ## Data and reproducibility
 

@@ -7,7 +7,6 @@ import json
 import numpy as np
 import pandas as pd
 from sklearn.metrics import average_precision_score, roc_auc_score
-from build_datasets import legacy_regime
 
 
 def binary_metrics(frame, score="score", weights=None):
@@ -52,14 +51,13 @@ def conditional_metrics(frame, identity, score="score"):
 
 
 def checkpoint_selection(frame, model, regime, ligand_identity="connectivity_key"):
-    regime = legacy_regime(regime)
     if model == "ligand" or (
-        model not in {"ligand", "protein"} and regime == "unseen_ligand"
+        model not in {"ligand", "protein"} and regime == "ligand_held_out"
     ):
         groups = ["uniprot"]
-    elif model == "protein" or regime in {"unseen_family", "double_unseen"}:
+    elif model == "protein" or regime in {"pfam_held_out", "double_held_out"}:
         groups = [ligand_identity]
-    elif regime == "row_random":
+    elif regime == "random":
         groups = ["uniprot", ligand_identity]
     else:
         raise ValueError("Unknown checkpoint selection regime")

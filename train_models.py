@@ -12,7 +12,7 @@ import torch
 from torch import nn
 from torch.utils.data import DataLoader, Dataset
 
-from build_datasets import partition, leave_one_family_out, legacy_dataset, legacy_regime, DATASET_NAMES, REGIME_NAMES
+from build_datasets import partition, leave_one_family_out, DATASET_NAMES, REGIME_NAMES
 from evaluate_models import checkpoint_selection
 
 PROTEIN_DIM = 1536
@@ -384,9 +384,9 @@ def deployment_epochs(paths, dataset, model):
         raise ValueError("Deployment requires all 15 distinct Pfam-held-out fits")
     for report, path in zip(reports, paths):
         if (
-            legacy_dataset(report["dataset"]) != legacy_dataset(dataset)
+            report["dataset"] != dataset
             or report["model"] != model
-            or legacy_regime(report["regime"]) != "unseen_family"
+            or report["regime"] != "pfam_held_out"
         ):
             raise ValueError("Wrong source fit for deployment")
         if (
@@ -398,8 +398,6 @@ def deployment_epochs(paths, dataset, model):
 
 
 def train(args):
-    args.dataset = legacy_dataset(args.dataset)
-    args.regime = legacy_regime(args.regime)
     frame = pd.read_csv(args.pairs, sep="\t")
     if frame.main_row_id.duplicated().any():
         raise ValueError("Duplicate pair row")
@@ -426,7 +424,10 @@ def train(args):
             frame.iloc[:0].copy(),
         )
     elif args.leave_family:
-        if args.dataset != "double_anchored" or args.regime != "double_unseen":
+        if (
+            args.dataset != "both_class_proteins_ligands"
+            or args.regime != "double_held_out"
+        ):
             raise ValueError(
                 "Leave-one-family-out protocol is for Both-class proteins & ligands under double held-out"
             )
@@ -465,7 +466,7 @@ def train(args):
     best = -np.inf
     stale = 0
     best_epoch = 0
-    constant = args.dataset == "ligand_anchored" or bool(args.leave_family)
+    constant = args.dataset == "both_class_ligands" or bool(args.leave_family)
     for epoch in range(1, epochs + 1):
         model.train()
         losses = []
@@ -502,7 +503,7 @@ def train(args):
             )
             ligand_identity = (
                 "full_inchikey"
-                if args.dataset == "ligand_anchored"
+                if args.dataset == "both_class_ligands"
                 else "connectivity_key"
             )
             value, selection = checkpoint_selection(
@@ -595,25 +596,23 @@ def main():
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument(
         "--dataset",
-        type=legacy_dataset,
         metavar="DATASET",
-        help="every_pair, both_class_proteins, both_class_ligands, both_class_proteins_ligands (historical aliases accepted)",
+        help="every_pair, both_class_proteins, both_class_ligands, both_class_proteins_ligands",
         choices=[
             "every_pair",
-            "protein_anchored",
-            "ligand_anchored",
-            "double_anchored",
+            "both_class_proteins",
+            "both_class_ligands",
+            "both_class_proteins_ligands",
         ],
         required=True,
     )
     parser.add_argument("--model", choices=VALID_MODELS, required=True)
     parser.add_argument(
         "--regime",
-        type=legacy_regime,
         metavar="SETTING",
-        help="random, pfam_held_out, ligand_held_out, double_held_out (historical aliases accepted)",
-        choices=["row_random", "unseen_family", "unseen_ligand", "double_unseen"],
-        default="unseen_family",
+        help="random, pfam_held_out, ligand_held_out, double_held_out",
+        choices=["random", "pfam_held_out", "ligand_held_out", "double_held_out"],
+        default="pfam_held_out",
     )
     parser.add_argument("--fold", type=int, choices=range(5), default=0)
     parser.add_argument("--seed", type=int, default=20260817)

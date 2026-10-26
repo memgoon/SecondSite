@@ -113,7 +113,9 @@ def main():
         raise ValueError("Invalid docking job table")
     if set(jobs.scoring) != {"vina", "vinardo"}:
         raise ValueError("Both scoring functions are required")
-    if not set(jobs.ligand_role).issubset({"candidate", "comparison", "background", "reference"}):
+    if not set(jobs.ligand_role).issubset(
+        {"candidate", "comparison", "background", "reference"}
+    ):
         raise ValueError("Unknown ligand role")
     for _, group in jobs.groupby(["system_id", "ligand_id", "pocket_id", "scoring"]):
         if len(group) != 5 or group.seed.nunique() != 5:

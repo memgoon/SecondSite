@@ -41,7 +41,9 @@ def novelty(frame, training):
     out["training_pair"] = out.training_pair.map(pairs.__contains__)
     out["protein_unseen"] = ~out.uniprot.isin(training.uniprot)
     out["ligand_unseen"] = ~out.connectivity_key.isin(training.connectivity_key)
-    out["double_unseen"] = out.protein_unseen & out.ligand_unseen
+    out["protein_and_ligand_absent_from_training"] = (
+        out.protein_unseen & out.ligand_unseen
+    )
     return out
 
 
@@ -182,7 +184,10 @@ def main():
                 ("all", labelled),
                 ("protein_unseen", labelled[labelled.protein_unseen]),
                 ("ligand_unseen", labelled[labelled.ligand_unseen]),
-                ("double_unseen", labelled[labelled.double_unseen]),
+                (
+                    "protein_and_ligand_absent_from_training",
+                    labelled[labelled.protein_and_ligand_absent_from_training],
+                ),
             ]:
                 metrics.append(
                     dict(

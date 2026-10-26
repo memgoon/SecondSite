@@ -63,9 +63,9 @@ def complete_cohorts(early):
     return (
         dict(
             every_pair=early.copy(),
-            protein_anchored=protein,
-            ligand_anchored=ligand,
-            double_anchored=double,
+            both_class_proteins=protein,
+            both_class_ligands=ligand,
+            both_class_proteins_ligands=double,
         ),
         history,
     )

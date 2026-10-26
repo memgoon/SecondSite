@@ -5,7 +5,7 @@
 **Heesu Jeong, Hanshin David Shin, So Yun Jhang, Lina Yi, Jeongwoo Seo and Heebal Kim**  
 Seoul National University · Correspondence: Heebal Kim
 
-[Web resource](https://secondsite.snu.ac.kr) · [Analysis workflow](#analysis-workflow) · [Input formats](INPUTS.md) · [Methods](METHODS.md)
+[Web resource](https://secondsite.snu.ac.kr) · [Model weights](https://huggingface.co/memgoon/SecondSite-models) · [Study data](https://huggingface.co/datasets/memgoon/SecondSite-data) · [Input formats](INPUTS.md) · [Methods](METHODS.md)
 
 ## Research question
 
@@ -90,32 +90,16 @@ python rank_biolip.py --reference-observations inputs/reference_observations.tsv
 
 Each script provides `--help`. Output directories must be new. Training jobs are individual fits so they can be scheduled independently across available GPUs. Data preparation, reference identity decisions and encoder inputs are described in [METHODS.md](METHODS.md); supplementary experiments use the same model and evaluation functions with their specified inputs.
 
-## Terminology and compatibility
-
-| Manuscript label | Recommended command-line value | Historical alias |
-|---|---|---|
-| Every-pair | `every_pair` | unchanged |
-| Both-class proteins | `both_class_proteins` | `protein_anchored` |
-| Both-class ligands | `both_class_ligands` | `ligand_anchored` |
-| Both-class proteins & ligands | `both_class_proteins_ligands` | `double_anchored` |
-| Random | `random` | `row_random` |
-| Pfam held-out | `pfam_held_out` | `unseen_family` |
-| Ligand held-out | `ligand_held_out` | `unseen_ligand` |
-| Double held-out | `double_held_out` | `double_unseen` |
-
-Both naming sets are accepted. Dataset output filenames use the recommended names
-by default; `build_datasets.py --legacy-filenames` preserves older filenames.
-Historical artifact identifiers remain readable and are not silently rewritten.
-New fit reports include `dataset_name` and `evaluation_setting` using the current
-terminology. ChEMBL `protein_unseen` and `ligand_unseen` columns describe absence
-from training, not a Pfam-held-out experiment; their meaning is unchanged.
-
 ## Data and reproducibility
 
 Prepared inputs are described in [INPUTS.md](INPUTS.md). Preserve the frozen row IDs,
 fold assignments, embedding tensors and pocket indices when reproducing the study.
 Model weights are maintained in [SecondSite-models](https://huggingface.co/memgoon/SecondSite-models);
 deployment and held-out evaluation checkpoints have separate directories.
+The companion data repository is
+[SecondSite-data](https://huggingface.co/datasets/memgoon/SecondSite-data).
+It is being prepared for release. Its manifest identifies the available files
+and their source-specific licenses.
 
 Docking analyses use reviewed receptor assemblies and site coordinates in the same
 coordinate frame. Site-contact agreement is a structural follow-up measure, not an

@@ -1,0 +1,12 @@
+base: nvidia/cuda:12.1.1-devel-ubuntu20.04
+plumed: 2.6
+gromacs: 2020.2
+nvcc: 12.1, V12.1.105
+gcc: 9.4.0
+amber: pmemd26 (md5 ceeabc133e772c115183d5cf6a87676b)
+ambertools=26.0=cuda_None_nompi_py314h2f9d5e2_100
+numpy=2.5.4=py314hd3a7d6b_0
+parmed=4.3.1=py314ha51126d_1
+python=3.14.10=hcd007b5_100_cp314
+pytraj=3.0.0.dev0=pypi_0
+scipy=1.18.1=py314h36f0660_2

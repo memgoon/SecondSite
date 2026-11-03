@@ -15,6 +15,10 @@ SecondSite examines this question using complementary reference datasets and hel
 
 This repository provides the benchmark, external ranking and structural follow-up workflows. Modules share the same model definitions and statistical functions.
 
+The [PTP1B molecular-dynamics workflow](md/README.md) provides the structure
+preparation, steering, contact-based seed selection and unrestrained simulation
+procedures used for compound 2e (H1–H5).
+
 ## Benchmark design
 
 Allosteric annotations come from ASD. Orthosteric references come from GtoPdb, KLIFS, BRENDA, UniProt, ChEBI and KEGG. Records are linked by exact UniProt accession and standardized full InChIKey; conflicting binding-role assignments are kept out of the benchmark. The integrated reference contains 20,640 pairs across 7,384 proteins. Of these, 6,854 pairs have the representations required by all eight models.

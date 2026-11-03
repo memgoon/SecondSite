@@ -62,6 +62,13 @@ unlabelled, not confirmed orthosteric negatives.
 
 ## Docking and site comparison
 
+The separate [PTP1B MD workflow](md/README.md) follows docking with a
+compound-specific structural-dynamics analysis. Preparation uses GROMACS
+2020.2; steered sampling uses Amber 26 with PLUMED 2.6.1, followed by 50 ns
+unrestrained Amber simulations from the retained pocket-contacting seeds.
+The four steering coordinates, parameterization, initial-seed selection and
+trajectory checks are specified with the runnable H1–H5 scripts.
+
 The docking comparison matches compounds in the top and bottom 10% of each
 protein's ranking. Molecular-weight differences must be at most 25% of the
 high-ranked compound's mass, logP differences at most 1.5, and polar-surface-area

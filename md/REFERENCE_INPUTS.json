@@ -1,0 +1,47 @@
+{
+  "repository": "https://github.com/michellab/AMMo",
+  "revision": "51f406b291fa23d0414d09c34215f8407e23dd45",
+  "license": "Apache-2.0",
+  "files": [
+    {
+      "source": "examples/example_ptp1b/inputs/closed-peptide-1.pdb",
+      "destination": "ammo_examples__example_ptp1b__inputs__closed-peptide-1.pdb",
+      "sha256": "dc77499f056689de85c30b4bded5a0b311424b8d9e2cb5cd5023cc6df0f71241"
+    },
+    {
+      "source": "examples/example_ptp1b/inputs/open-peptide-1.pdb",
+      "destination": "ammo_examples__example_ptp1b__inputs__open-peptide-1.pdb",
+      "sha256": "352910c6e0c37928783e98eb944e0f2a3ae56c1b252396e30f612af02fa0424d"
+    },
+    {
+      "source": "examples/example_ptp1b/inputs/closed_ref.pdb",
+      "destination": "ammo_examples__example_ptp1b__inputs__closed_ref.pdb",
+      "sha256": "478e5c6c57477134ff0da4aca4ec9bb4bc3ee26909dfc8614c5239b5e666f1bf"
+    },
+    {
+      "source": "examples/example_ptp1b/inputs/open_ref.pdb",
+      "destination": "ammo_examples__example_ptp1b__inputs__open_ref.pdb",
+      "sha256": "102e7b9919463fa738dcfa01faa077de5b61b36e54d4063a635e6fd49eed56a6"
+    },
+    {
+      "source": "examples/example_ptp1b/inputs/closed.pdb",
+      "destination": "ammo_examples__example_ptp1b__inputs__closed.pdb",
+      "sha256": "79e758fa7d5e7e7bcddb8aaad6f2aa7a3d9027f865498598df8b7f35cb28cf76"
+    },
+    {
+      "source": "examples/example_ptp1b/.defaults/open_to_closed.dat",
+      "destination": "ammo_examples__example_ptp1b__.defaults__open_to_closed.dat",
+      "sha256": "33cf4341d51a9c335e2197b0d226c1fc8f3b270487ecfbdfc8ea3fb15638d91f"
+    },
+    {
+      "source": "examples/example_ptp1b/.defaults/closed_to_open.dat",
+      "destination": "ammo_examples__example_ptp1b__.defaults__closed_to_open.dat",
+      "sha256": "b48327d3fb8680e831b63be161fa60e82073c7e0bc6520e9a215ff8681346602"
+    },
+    {
+      "source": "LICENSE",
+      "destination": "AMMo-LICENSE",
+      "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4"
+    }
+  ]
+}

@@ -11,3 +11,15 @@ results/
 *.pem
 *.key
 .DS_Store
+md/refs/
+md/candidate_inputs/
+md/systems_author/
+md/prepared_gmx/
+md/open/
+md/closed/
+md/audit/
+md/params/
+md/h5_coords_*/
+md/contact_*/
+md/pose_*/
+md/image_*/

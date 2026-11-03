@@ -1,0 +1,11 @@
+integrator            = steep
+nsteps                = 7500
+nstxout               = 7500
+pbc                   = xyz
+cutoff-scheme          = Verlet
+ns-type               = grid
+rlist                 = 1.2
+rvdw                  = 1.2
+rcoulomb              = 1.2
+coulombtype           = PME
+DispCorr              = EnerPres

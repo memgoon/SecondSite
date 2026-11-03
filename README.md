@@ -36,7 +36,7 @@ The eight models are ligand-only, protein-only, C1–C3 and D1–D3. C models re
 
 Models are assessed under random, Pfam held-out, ligand held-out and double held-out evaluation. Ligand exclusion uses molecular connectivity. An additional Murcko scaffold analysis tests a broader structural exclusion. Only double held-out evaluation on Both-class proteins & ligands uses 47 leave-one-family-out partitions; its Pfam held-out evaluation remains five-fold.
 
-SecondSite makes model-specific ChEMBL and BioLiP rankings searchable alongside activity and structural records. These collections support selection of interactions for follow-up experiments. Ranking scores are not calibrated probabilities of allostery, and source-database absence is not proof of biological novelty.
+SecondSite makes model-specific ChEMBL and BioLiP rankings searchable alongside activity and structural records. Users can compare rankings across models and training datasets to select interactions for follow-up experiments.
 
 ## Analysis workflow
 
@@ -102,12 +102,10 @@ Model weights are maintained in [SecondSite-models](https://huggingface.co/memgo
 deployment and held-out evaluation checkpoints have separate directories.
 The companion data repository is
 [SecondSite-data](https://huggingface.co/datasets/memgoon/SecondSite-data).
-It is being prepared for release. Its manifest identifies the available files
-and their source-specific licenses.
+Its manifest identifies the available files and their source-specific licenses.
 
-Docking analyses use reviewed receptor assemblies and site coordinates in the same
-coordinate frame. Site-contact agreement is a structural follow-up measure, not an
-experimental demonstration of allosteric modulation.
+Docking analyses compare ligand poses with orthosteric and known allosteric sites
+using residue contacts in a shared receptor coordinate frame.
 
 ## Citation
 

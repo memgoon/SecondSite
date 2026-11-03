@@ -22,11 +22,11 @@ Training additionally requires frozen `matrix_row_fold`, `matrix_family_fold` an
 
 `build_datasets.py` writes all four dataset tables and counts. Supply `matrix_evaluation_eligible` already at this stage: it identifies the frozen 4,637-row Both-class proteins reference within the broader input. Preserve that supplied membership to reproduce the published evaluation population. Both-class proteins & ligands is constructed from this frozen reference. The optional `murcko_scaffolds_json` field contains a union of nonempty atom/bond-specific Murcko scaffolds per connectivity. Acyclic compounds are retained under connectivity exclusion, without placing every acyclic molecule in a shared empty-scaffold group.
 
-Protein inputs are tensors of shape residues × 1,536; ligand inputs are heavy atoms × 512. `.pt` files may contain one tensor or a dictionary with a single compatible tensor. Paths resolve relative to `--tensor-root`. `pocket_indices.json` maps a UniProt accession to zero-based indices in its selected chain tensor. These are not canonical UniProt residue numbers or PDB author residue IDs. Prepared selected-chain tensors and pocket masks must agree exactly. Biological assemblies are not represented by a single chain tensor.
+Protein inputs are tensors of shape residues × 1,536; ligand inputs are heavy atoms × 512. `.pt` files may contain one tensor or a dictionary with a single compatible tensor. Paths resolve relative to `--tensor-root`. `pocket_indices.json` maps a UniProt accession to zero-based indices in its selected chain tensor. These are not canonical UniProt residue numbers or PDB author residue IDs. Prepared selected-chain tensors and pocket masks must agree exactly.
 
 Outputs from training: `checkpoint.pt`, `fit.json` and held-out `predictions.tsv.gz`. Each job represents one model, one seed and one outer fold. Evaluation combines exactly three seed predictions per row with matching labels, identities and folds. To evaluate a particular published population, restrict prediction inputs to that frozen row set before aggregation.
 
-For the 47-fold double held-out protocol on Both-class proteins & ligands, invoke `train_models.py` once for each family with `--dataset both_class_proteins_ligands --regime double_held_out --leave-family FAMILY_ID`. This uses epoch 25 and has no validation partition. Pfam held-out evaluation on this same dataset remains five-fold. For deployment, supply all 15 corresponding Pfam-held-out `fit.json` files using `--deployment-fit-reports`; the model is then initialized afresh and trained on the complete supplied dataset for their median best epoch. Historical CLI values and report identifiers remain accepted; see the compatibility table in README.md.
+For the 47-fold double held-out protocol on Both-class proteins & ligands, invoke `train_models.py` once for each family with `--dataset both_class_proteins_ligands --regime double_held_out --leave-family FAMILY_ID`. This uses epoch 25 and has no validation partition. Pfam held-out evaluation on this same dataset remains five-fold. For deployment, supply all 15 corresponding Pfam-held-out `fit.json` files using `--deployment-fit-reports`; the model is then initialized afresh and trained on the complete supplied dataset for their median best epoch.
 
 ## 3. External screening
 
@@ -62,7 +62,7 @@ Outputs include aggregated pairs, residue contact frequencies, held-out referenc
 
 Supply one neural dataset/regime's seed-ensemble scores and one structural held-out regime, with `uniprot`, `full_inchikey`, `binary_label`, `family_component_id`, `score`, and respectively `model` or `method`. Neural input includes all eight models. The four default structural methods are direct distance, KDE distance + aromatic rings, KDE distance + molecular weight and quantile-bin distance + aromatic rings.
 
-Matching uses exact pair identities and consistent reference labels. All selected methods must have scores for the same pair. Output tables contain paired scores, per-protein agreement, cluster-bootstrap intervals and differences against ligand-only. The two source family partitions are joined for resampling; held-out score agreement is not a new external validation experiment.
+Matching uses exact pair identities and consistent reference labels. All selected methods must have scores for the same pair. Output tables contain paired scores, per-protein agreement, cluster-bootstrap intervals and differences against ligand-only. The two source family partitions are joined for resampling.
 
 ## 7. Time-split validation
 

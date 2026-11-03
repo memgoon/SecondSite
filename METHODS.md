@@ -32,7 +32,7 @@ BioLiP observations are grouped by exact protein–ligand pair. Features use a m
 
 Four features—orthosteric-site distance, molecular weight, cLogP and aromatic-ring count—form 15 nonempty combinations. Three estimators yield 45 likelihood rankings, supplemented by direct distance. Quantile-bin naïve Bayes uses cube-root bin counts and Jeffreys 0.5 smoothing. Gaussian KDE uses Scott bandwidths, clips evaluation values to the training feature range and adds 1e-12 to density values. Aromatic rings use categorical frequencies with an unseen-category bin. Feature-specific KDE caps are 0.01–100 for distance and 0.1–10 for chemistry; common-scale caps are 0.01–100 for all components. Scores sum component log likelihood ratios. Bins and densities are fitted inside each held-out training fold. Candidate scoring refits on the complete reference. Incomplete candidates retain NA scores.
 
-The optional review funnel applies spatial, compound and known-role checks before agreement across four ranking views and repeated-PDB support. These flags organize review; they do not establish novelty or a functional mechanism. The direct-distance reference result is linked to how known sites were selected and should not be interpreted as prospective allostery accuracy.
+The optional review funnel applies spatial, compound and known-role checks before agreement across four ranking views and repeated-PDB support.
 
 ## Time-split validation
 
@@ -48,8 +48,7 @@ models, the discriminable conditional AUROC for single-input models, and symmetr
 average precision when fewer than eight conditional groups are available. Models
 are then reinitialized with the same seed and fitted to the full earlier cohort
 for the selected number of epochs. The later test is evaluated after refitting.
-Linked source years identify the temporal split; they are not automatically the
-first experimental report of each binding role.
+Temporal partitions use the years assigned to the linked source records.
 
 External recovery uses the frozen later ChEMBL population after exclusion of
 earlier and undated protein–connectivity pairs. Assay-keyword and literature-review
@@ -93,4 +92,4 @@ high-minus-low frequencies use protein-cluster bootstrap intervals and
 protein-block sign-flip tests. Holm correction uses the 16 cohort/model conditions
 within each endpoint, score threshold and scoring criterion. Unsupported reference
 sites and incomplete matched comparisons are excluded explicitly rather than
-recorded as unsuccessful poses. Docking scores are not experimental binding energies.
+recorded as unsuccessful poses.

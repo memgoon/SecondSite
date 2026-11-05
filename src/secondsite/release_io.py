@@ -20,7 +20,7 @@ COHORT_IDS = {
     "both_classed_ligand": "both_class_ligands",
     "both_classed_proteins_and_ligands": "both_class_proteins_ligands",
 }
-DATA_REVISION = "d47562ca2832a7ef32853dc73f6409773184745f"
+DATA_REVISION = "605300770996a4dc324ac5dde9b9870e861c22fd"
 MODEL_REVISION = "a7b5412e5007cd616793c3d678f82d65f1c54c48"
 
 

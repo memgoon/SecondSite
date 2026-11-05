@@ -51,7 +51,7 @@ def download(args):
     }
     if args.data_profile != "none":
         snapshot_download(
-            "memgoon/SecondSite-data",
+            "memgoon/SecondSite_data",
             repo_type="dataset",
             revision=args.data_revision,
             local_dir=str(args.destination / "data"),

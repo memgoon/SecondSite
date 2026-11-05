@@ -5,7 +5,7 @@
 **Heesu Jeong, Hanshin David Shin, So Yun Jhang, Lina Yi, Jeongwoo Seo and Heebal Kim**  
 Seoul National University · Correspondence: Heebal Kim
 
-[Web resource](https://secondsite.snu.ac.kr) · [Model weights](https://huggingface.co/memgoon/SecondSite-models) · [Study data](https://huggingface.co/datasets/memgoon/SecondSite-data) · [Input formats](docs/INPUTS.md) · [Methods](docs/METHODS.md)
+[Web resource](https://secondsite.snu.ac.kr) · [Model weights](https://huggingface.co/memgoon/SecondSite-models) · [Study data](https://huggingface.co/datasets/memgoon/SecondSite_data) · [Input formats](docs/INPUTS.md) · [Methods](docs/METHODS.md)
 
 ## Research question
 
@@ -122,7 +122,7 @@ fold assignments, embedding tensors and pocket indices when reproducing the stud
 Model weights are maintained in [SecondSite-models](https://huggingface.co/memgoon/SecondSite-models);
 deployment and held-out evaluation checkpoints have separate directories.
 The companion data repository is
-[SecondSite-data](https://huggingface.co/datasets/memgoon/SecondSite-data).
+[SecondSite_data](https://huggingface.co/datasets/memgoon/SecondSite_data).
 Its manifest identifies the available files and their source-specific licenses.
 
 Docking analyses compare ligand poses with orthosteric and known allosteric sites

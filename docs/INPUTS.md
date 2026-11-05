@@ -1,7 +1,7 @@
 # Inputs and outputs
 
 For the published benchmark, load the four `benchmark/*.tsv.gz` tables from
-SecondSite-data directly. Their embedding paths are relative to the downloaded
+SecondSite_data directly. Their embedding paths are relative to the downloaded
 data repository root; set `--tensor-root` to that root. The following sections
 also describe the upstream preparation commands for constructing new datasets.
 See [HF workflows](HF_WORKFLOWS.md) for release-specific commands.

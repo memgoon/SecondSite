@@ -25,7 +25,7 @@ in `ENVIRONMENT.txt`.
 Retrieve the exact reference structures and steering templates with:
 
 ```bash
-python md/fetch_reference_inputs.py
+python workflows/md/fetch_reference_inputs.py
 ```
 
 The download is pinned to AMMo commit
@@ -49,11 +49,11 @@ their locations.
 ## Preparation and steering
 
 ```bash
-python md/scripts/h1b_author_input.py
-bash md/scripts/h2b_gromacs_prep.sh open 16
-bash md/scripts/h2b_gromacs_prep.sh closed 16
-bash md/scripts/h3b_amber_smd.sh --state open --prep md/prepared_gmx/2e__open --out md/open/production
-bash md/scripts/h3b_amber_smd.sh --state closed --prep md/prepared_gmx/2e__closed --out md/closed/production
+python workflows/md/scripts/h1b_author_input.py
+bash workflows/md/scripts/h2b_gromacs_prep.sh open 16
+bash workflows/md/scripts/h2b_gromacs_prep.sh closed 16
+bash workflows/md/scripts/h3b_amber_smd.sh --state open --prep workflows/md/prepared_gmx/2e__open --out workflows/md/open/production
+bash workflows/md/scripts/h3b_amber_smd.sh --state closed --prep workflows/md/prepared_gmx/2e__closed --out workflows/md/closed/production
 ```
 
 PTP1B residues 1–282 and the phosphotyrosine substrate are retained. Protein,
@@ -74,9 +74,9 @@ notebook. Run the H4 contact and pose tools on these exact snapshots, then join
 their records with `h4s_seed_strata.py --leg ... --json <strata.json>`.
 Each tool provides argument details through `--help`.
 
-With the directory layout above, `bash md/run_seed_selection.sh` runs these
+With the directory layout above, `bash workflows/md/run_seed_selection.sh` runs these
 steps for both completed steering directions and writes the selected seed list
-to `md/audit/pocket.seeds`. Run it in a new analysis output layout: existing
+to `workflows/md/audit/pocket.seeds`. Run it in a new analysis output layout: existing
 snapshot exports are not overwritten.
 
 The H5 input subset retains snapshots with at least one contact to the
@@ -91,8 +91,8 @@ H5 while verifying that imaging preserves intramolecular geometry and contacts.
 For each retained seed:
 
 ```bash
-bash md/scripts/h5_seed_prep.sh <seed-dir> <imaged-snapshot.pdb> <ligand.mol2> <ligand.frcmod> 16 --parent <parent-dry.prmtop>
-bash md/scripts/h5b_seeded_md.sh --seed <seed-dir> --ns 50
+bash workflows/md/scripts/h5_seed_prep.sh <seed-dir> <imaged-snapshot.pdb> <ligand.mol2> <ligand.frcmod> 16 --parent <parent-dry.prmtop>
+bash workflows/md/scripts/h5b_seeded_md.sh --seed <seed-dir> --ns 50
 ```
 
 H5 uses fresh initial velocities, a 2 fs step and 10 ps trajectory output.

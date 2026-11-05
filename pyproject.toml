@@ -1,0 +1,20 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "secondsite"
+version = "0.2.0"
+description = "Benchmark and ranking workflows for allosteric protein-ligand interactions"
+requires-python = ">=3.9"
+dynamic = ["dependencies"]
+license = {file = "LICENSE"}
+
+[tool.setuptools.dynamic]
+dependencies = {file = ["requirements.txt"]}
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[project.scripts]
+secondsite = "secondsite.release_cli:main"

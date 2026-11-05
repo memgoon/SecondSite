@@ -5,7 +5,7 @@
 **Heesu Jeong, Hanshin David Shin, So Yun Jhang, Lina Yi, Jeongwoo Seo and Heebal Kim**  
 Seoul National University · Correspondence: Heebal Kim
 
-[Web resource](https://secondsite.snu.ac.kr) · [Model weights](https://huggingface.co/memgoon/SecondSite-models) · [Study data](https://huggingface.co/datasets/memgoon/SecondSite-data) · [Input formats](INPUTS.md) · [Methods](METHODS.md)
+[Web resource](https://secondsite.snu.ac.kr) · [Model weights](https://huggingface.co/memgoon/SecondSite-models) · [Study data](https://huggingface.co/datasets/memgoon/SecondSite-data) · [Input formats](docs/INPUTS.md) · [Methods](docs/METHODS.md)
 
 ## Research question
 
@@ -15,7 +15,7 @@ SecondSite examines this question using complementary reference datasets and hel
 
 This repository provides the benchmark, external ranking and structural follow-up workflows. Modules share the same model definitions and statistical functions.
 
-The [PTP1B molecular-dynamics workflow](md/README.md) provides the structure
+The [PTP1B molecular-dynamics workflow](workflows/md/README.md) provides the structure
 preparation, steering, contact-based seed selection and unrestrained simulation
 procedures used for compound 2e (H1–H5).
 
@@ -42,61 +42,82 @@ SecondSite makes model-specific ChEMBL and BioLiP rankings searchable alongside 
 
 | Step | File | Main calculation |
 |---|---|---|
-| 1 | [prepare_references.py](prepare_references.py) | Validate exact chemical identities, combine source annotations and separate conflicting pairs |
-| 2 | [build_datasets.py](build_datasets.py) | Construct the four role-based datasets; apply and audit held-out partitions and scaffold exclusion |
-| 3 | [train_models.py](train_models.py) | Define all eight architectures, fit prediction heads and select deployment durations from cross-validation |
-| 4 | [evaluate_models.py](evaluate_models.py) | Combine seeds, calculate pooled and conditional metrics, and compare fixed predictions using paired cluster bootstrap |
-| 5 | [screen_chembl.py](screen_chembl.py) | Score external pairs, exclude training pairs, rank within proteins and evaluate labels and assay keywords |
-| 6 | [structural_followup.py](structural_followup.py) | Run prespecified Vina/Vinardo comparisons and summarize candidate and background-ligand poses |
-| 7 | [rank_biolip.py](rank_biolip.py) | Aggregate structural observations per exact pair, summarize contacts at 60% frequency and fit 46 rankings |
-| 8 | [compare_rankings.py](compare_rankings.py) | Compare existing neural and structural scores on shared reference pairs with paired uncertainty |
-| 9 | [time_split.py](time_split.py) | Reconstruct all four datasets from records through 2015; select epochs on earlier validation records, refit and predict later records |
-| 10 | [ranking_recovery.py](ranking_recovery.py) | Evaluate fixed ChEMBL rankings against assay annotations and literature-supported pairs, with fractional boundary ties and protein-cluster intervals |
-| 11 | [docking_sites.py](docking_sites.py) | Match top/bottom-decile compounds, classify first poses by residue contacts, and compare paired site-support frequencies |
-| 12 | [attention_analysis.py](attention_analysis.py) | Measure residue attention at annotated binding sites and its variation across ligands and seeds |
+| 1 | [prepare_references.py](src/secondsite/prepare_references.py) | Validate exact chemical identities, combine source annotations and separate conflicting pairs |
+| 2 | [build_datasets.py](src/secondsite/build_datasets.py) | Construct the four role-based datasets; apply and audit held-out partitions and scaffold exclusion |
+| 3 | [train_models.py](src/secondsite/train_models.py) | Define all eight architectures, fit prediction heads and select deployment durations from cross-validation |
+| 4 | [evaluate_models.py](src/secondsite/evaluate_models.py) | Combine seeds, calculate pooled and conditional metrics, and compare fixed predictions using paired cluster bootstrap |
+| 5 | [screen_chembl.py](src/secondsite/screen_chembl.py) | Score external pairs, exclude training pairs, rank within proteins and evaluate labels and assay keywords |
+| 6 | [structural_followup.py](src/secondsite/structural_followup.py) | Run prespecified Vina/Vinardo comparisons and summarize candidate and background-ligand poses |
+| 7 | [rank_biolip.py](src/secondsite/rank_biolip.py) | Aggregate structural observations per exact pair, summarize contacts at 60% frequency and fit 46 rankings |
+| 8 | [compare_rankings.py](src/secondsite/compare_rankings.py) | Compare existing neural and structural scores on shared reference pairs with paired uncertainty |
+| 9 | [time_split.py](src/secondsite/time_split.py) | Reconstruct all four datasets from records through 2015; select epochs on earlier validation records, refit and predict later records |
+| 10 | [ranking_recovery.py](src/secondsite/ranking_recovery.py) | Evaluate fixed ChEMBL rankings against assay annotations and literature-supported pairs, with fractional boundary ties and protein-cluster intervals |
+| 11 | [docking_sites.py](src/secondsite/docking_sites.py) | Match top/bottom-decile compounds, classify first poses by residue contacts, and compare paired site-support frequencies |
+| 12 | [attention_analysis.py](src/secondsite/attention_analysis.py) | Measure residue attention at annotated binding sites and its variation across ligands and seeds |
 
 Steps 1–5 provide the main benchmark and screening workflow. Steps 7–8 provide structure-based rankings and their comparison with model scores. Time-split validation uses steps 9–10. Structural follow-up uses step 11 for selection, step 6 for docking, and step 11 for site classification and paired analysis.
 
+## Repository layout
+
+```text
+src/secondsite/   Model, dataset, evaluation and ranking modules
+scripts/         Commands using the released HF data
+workflows/md/    PTP1B molecular-dynamics workflow
+docs/           Input formats and computational methods
+tests/          Unit tests and release integration checks
+```
+
 ## Installation and use
 
-Python 3.10 or later is recommended. Install PyTorch for the available CPU/GPU first, then the remaining dependencies:
+Python 3.10 or later is recommended. Install PyTorch for the available CPU/GPU,
+then install this repository:
 
 ```bash
 python -m venv .venv
 source .venv/bin/activate
-python -m pip install -r requirements.txt
+python -m pip install -e .
 ```
 
-Inputs are supplied explicitly through command-line arguments. See [INPUTS.md](INPUTS.md) for required columns, identity conventions and prepared representations.
+Download the pinned data release and deployment models:
 
 ```bash
-# Integrate identity-resolved database exports.
-python prepare_references.py --sources inputs/source_annotations.tsv --output results/references
-
-# Build datasets from the model-ready reference and supplied frozen fold assignments.
-python build_datasets.py --model-ready-pairs inputs/model_ready_pairs.tsv.gz \
-  --include-scaffolds --output results/datasets
-
-# Fit one model, seed and outer fold. Repeat using the frozen experiment design.
-python train_models.py --pairs results/datasets/both_class_proteins.tsv.gz \
-  --pockets inputs/pocket_indices.json --tensor-root inputs/tensors \
-  --dataset both_class_proteins --regime pfam_held_out --model c2 \
-  --fold 0 --seed 20260817 --device cuda:0 --output results/fits/c2_seed20260817_fold0
-
-# Evaluate predictions from three seeds across all outer folds.
-python evaluate_models.py --predictions results/fits/*/predictions.tsv.gz \
-  --output results/benchmark
-
-# Fit structure-based rankings using prepared exact observations.
-python rank_biolip.py --reference-observations inputs/reference_observations.tsv.gz \
-  --candidate-observations inputs/candidate_observations.tsv.gz --output results/biolip
+python -m secondsite download --destination artifacts --data-profile all --models-profile deployment
+python -m secondsite check-release --data-root artifacts/data --models-root artifacts/models
 ```
 
-Each script provides `--help`. Output directories must be new. Training jobs are individual fits so they can be scheduled independently across available GPUs. Data preparation, reference identity decisions and encoder inputs are described in [METHODS.md](METHODS.md); supplementary experiments use the same model and evaluation functions with their specified inputs.
+For access-controlled repositories, authenticate with `hf auth login` before
+downloading. To obtain all held-out evaluation checkpoints, use
+`--models-profile all`. The download command accepts explicit revision overrides.
+
+Evaluate the published predictions and fit the structural rankings:
+
+```bash
+bash scripts/evaluate_benchmark.sh artifacts/data results/benchmark
+bash scripts/evaluate_chembl.sh artifacts/data results/chembl
+bash scripts/rank_biolip.sh artifacts/data results/biolip
+```
+
+To train one benchmark fit, use the released cohort directly so its row IDs
+and dataset-specific fold assignments are retained:
+
+```bash
+python -m secondsite.train_models --pairs artifacts/data/benchmark/both_class_proteins.tsv.gz --pockets artifacts/data/inputs/pockets/main_benchmark.json --tensor-root artifacts/data --dataset both_class_proteins --regime pfam_held_out --model c2 --fold 0 --seed 20260817 --device cuda:0 --output results/fits/c2_seed20260817_fold0
+```
+
+New-pair ranking uses the three released deployment seeds:
+
+```bash
+python -m secondsite predict --data-root artifacts/data --models-root artifacts/models --pairs inputs/new_pairs.tsv --tensor-root inputs --pockets inputs/pocket_indices.json --dataset both_class_proteins --model c2 --device cuda:0 --output results/new_pairs
+```
+
+The new-pair table identifies proteins, ligands and their prepared embeddings.
+See [Input formats](docs/INPUTS.md) and [HF workflows](docs/HF_WORKFLOWS.md) for
+the exact fields and commands. Each command provides `--help`; output directories
+must be new. MD instructions are in [workflows/md](workflows/md/README.md).
 
 ## Data and reproducibility
 
-Prepared inputs are described in [INPUTS.md](INPUTS.md). Preserve the frozen row IDs,
+Prepared inputs are described in [INPUTS.md](docs/INPUTS.md). Preserve the frozen row IDs,
 fold assignments, embedding tensors and pocket indices when reproducing the study.
 Model weights are maintained in [SecondSite-models](https://huggingface.co/memgoon/SecondSite-models);
 deployment and held-out evaluation checkpoints have separate directories.

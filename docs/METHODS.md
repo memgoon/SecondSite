@@ -61,7 +61,7 @@ unlabelled, not confirmed orthosteric negatives.
 
 ## Docking and site comparison
 
-The separate [PTP1B MD workflow](md/README.md) follows docking with a
+The separate [PTP1B MD workflow](../workflows/md/README.md) follows docking with a
 compound-specific structural-dynamics analysis. Preparation uses GROMACS
 2020.2; steered sampling uses Amber 26 with PLUMED 2.6.1, followed by 50 ns
 unrestrained Amber simulations from the retained pocket-contacting seeds.

@@ -6,6 +6,7 @@ import json
 
 import numpy as np
 import pandas as pd
+from .release_io import prediction_frame
 from sklearn.metrics import average_precision_score, roc_auc_score
 
 
@@ -80,6 +81,7 @@ def checkpoint_selection(frame, model, regime, ligand_identity="connectivity_key
 
 
 def ensemble_predictions(frame):
+    frame = prediction_frame(frame)
     keys = [k for k in ["dataset", "regime", "model", "main_row_id"] if k in frame]
     if "model" not in keys or "main_row_id" not in keys or "seed" not in frame:
         raise ValueError("Predictions require model, main_row_id and seed")
@@ -109,8 +111,27 @@ def ensemble_predictions(frame):
     result = frame.groupby(keys, as_index=False).agg(
         **{c: (c, "first") for c in metadata},
         score=("score", "mean"),
-        seed_sd=("score", "std")
+        seed_sd=("score", "std"),
     )
+    # Match the fixed benchmark aggregation for identical single-input examples.
+    for model, identity in [("ligand", "full_inchikey"), ("protein", "uniprot")]:
+        mask = result.model.eq(model)
+        if not mask.any():
+            continue
+        if identity not in result or "outer_fold" not in result:
+            raise ValueError(
+                "Single-input aggregation requires identity and outer_fold"
+            )
+        group_keys = [k for k in ["dataset", "regime"] if k in result]
+        group_keys += ["model", "outer_fold", identity]
+        block = result.loc[mask]
+        if block[group_keys].isna().any().any():
+            raise ValueError("Missing single-input identity or fold")
+        grouped = block.groupby(group_keys, sort=False)["score"]
+        spans = grouped.max() - grouped.min()
+        if spans.max() > 0.01:
+            raise ValueError("Identical single-input scores exceed numerical tolerance")
+        result.loc[mask, "score"] = grouped.transform("mean").to_numpy()
     return result
 
 
@@ -186,6 +207,15 @@ def main():
     parser.add_argument("--predictions", nargs="+", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument(
+        "--ensemble",
+        action="store_true",
+        help="Input already contains seed-ensemble scores",
+    )
+    parser.add_argument(
+        "--dataset", help="Select one training dataset from a combined prediction table"
+    )
+    parser.add_argument("--regime", help="Select one evaluation regime")
+    parser.add_argument(
         "--bootstrap-reference",
         choices=["ligand", "protein"],
         help="Optional paired comparisons against this baseline",
@@ -196,7 +226,28 @@ def main():
     frame = pd.concat(
         [pd.read_csv(p, sep="\t") for p in args.predictions], ignore_index=True
     )
-    ensemble = ensemble_predictions(frame)
+    frame = prediction_frame(frame)
+    for column in ("dataset", "regime"):
+        selected = getattr(args, column)
+        if selected is not None:
+            if column not in frame:
+                raise ValueError("Input lacks filter field: " + column)
+            frame = frame[frame[column].eq(selected)].copy()
+    if frame.empty:
+        raise ValueError("No predictions match the selected dataset/regime")
+    if args.ensemble:
+        keys = [k for k in ["dataset", "regime", "model", "main_row_id"] if k in frame]
+        if (
+            "main_row_id" not in keys
+            or "model" not in keys
+            or frame.duplicated(keys).any()
+        ):
+            raise ValueError(
+                "Ensemble input must have one row per dataset/regime/model/pair"
+            )
+        ensemble = frame
+    else:
+        ensemble = ensemble_predictions(frame)
     rows = []
     keys = [k for k in ["dataset", "regime", "model"] if k in ensemble]
     for identifiers, group in ensemble.groupby(keys):
@@ -207,7 +258,7 @@ def main():
                 **base,
                 metric_scope="pooled",
                 n_rows_used=len(group),
-                **binary_metrics(group)
+                **binary_metrics(group),
             )
         )
         for identity in ["uniprot", "full_inchikey"]:
@@ -215,7 +266,7 @@ def main():
                 dict(
                     **base,
                     metric_scope="within_" + identity,
-                    **conditional_metrics(group, identity)
+                    **conditional_metrics(group, identity),
                 )
             )
     args.output.mkdir(parents=True, exist_ok=False)
@@ -263,7 +314,7 @@ def main():
                                 "pooled" if identity is None else "within_" + identity
                             ),
                             rows=len(paired),
-                            **result
+                            **result,
                         )
                     )
         pd.DataFrame(differences).to_csv(

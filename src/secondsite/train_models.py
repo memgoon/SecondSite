@@ -12,8 +12,9 @@ import torch
 from torch import nn
 from torch.utils.data import DataLoader, Dataset
 
-from build_datasets import partition, leave_one_family_out, DATASET_NAMES, REGIME_NAMES
-from evaluate_models import checkpoint_selection
+from .build_datasets import partition, leave_one_family_out, DATASET_NAMES, REGIME_NAMES
+from .evaluate_models import checkpoint_selection
+from .release_io import frozen_partition
 
 PROTEIN_DIM = 1536
 LIGAND_DIM = 512
@@ -403,6 +404,10 @@ def train(args):
         raise ValueError("Duplicate pair row")
     pockets = json.loads(args.pockets.read_text())
     deployment = bool(args.deployment_fit_reports)
+    if args.membership and (deployment or args.leave_family):
+        raise ValueError(
+            "Explicit membership is selected with --fold, not deployment or --leave-family"
+        )
     if sum([deployment, bool(args.leave_family), bool(args.scaffold_exclusion)]) > 1:
         raise ValueError(
             "Deployment, leave-family-out and scaffold sensitivity are separate protocols"
@@ -432,6 +437,11 @@ def train(args):
                 "Leave-one-family-out protocol is for Both-class proteins & ligands under double held-out"
             )
         train, validation, test = leave_one_family_out(frame, args.leave_family)
+        epochs = 25
+    elif args.membership:
+        train, validation, test = frozen_partition(
+            frame, args.membership, args.dataset, args.regime, args.fold
+        )
         epochs = 25
     else:
         train, validation, test = partition(
@@ -576,6 +586,7 @@ def train(args):
         validation_rows=len(validation),
         test_rows=len(test),
         input_sha256=file_hash(args.pairs),
+        membership_sha256=file_hash(args.membership) if args.membership else None,
         pocket_sha256=file_hash(args.pockets),
         checkpoint_sha256=file_hash(args.output / "checkpoint.pt"),
         history=history,
@@ -618,6 +629,9 @@ def main():
     parser.add_argument("--seed", type=int, default=20260817)
     parser.add_argument("--leave-family")
     parser.add_argument("--scaffold-exclusion", action="store_true")
+    parser.add_argument(
+        "--membership", type=Path, help="Use released row-ID split membership directly"
+    )
     parser.add_argument("--deployment-fit-reports", nargs="+", type=Path)
     parser.add_argument("--device", default="cuda:0")
     train(parser.parse_args())

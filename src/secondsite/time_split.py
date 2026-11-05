@@ -10,8 +10,8 @@ import pandas as pd
 import torch
 from torch.utils.data import DataLoader
 
-from build_datasets import DATASET_NAMES
-from train_models import (
+from .build_datasets import DATASET_NAMES
+from .train_models import (
     PairDataset,
     collate_pairs,
     make_model,
@@ -19,8 +19,8 @@ from train_models import (
     training_weights,
     file_hash,
 )
-from evaluate_models import binary_metrics, conditional_metrics
-from screen_chembl import input_availability
+from .evaluate_models import binary_metrics, conditional_metrics
+from .screen_chembl import input_availability
 
 
 def validate_temporal(frame, cutoff=2015):

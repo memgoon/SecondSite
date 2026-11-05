@@ -9,8 +9,8 @@ import numpy as np
 import pandas as pd
 import torch
 
-from train_models import make_model, predict, file_hash
-from evaluate_models import binary_metrics, conditional_metrics
+from .train_models import make_model, predict, file_hash
+from .evaluate_models import binary_metrics, conditional_metrics
 
 
 def input_availability(frame, model, pockets, tensor_root):

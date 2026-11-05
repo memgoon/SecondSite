@@ -6,7 +6,7 @@ import argparse
 import numpy as np
 import pandas as pd
 from scipy.stats import rankdata
-from evaluate_models import binary_metrics
+from .evaluate_models import binary_metrics
 
 
 def spearman(a, b):
